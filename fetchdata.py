@@ -1,4 +1,5 @@
 import requests
+from copy import deepcopy
 from collections import Counter
 
 
@@ -9,11 +10,19 @@ class BanksData:
         self.banks = Counter()
         self.banks['__undefined__'] = []
         self.banks_total_CAD = dict()
+        self.extra_mile = []
 
         self.fetchdata()
         self.create_counter()
         self.compute_total_CAD()
 
+    def create_extra_mile(self):
+        for d in self.data:
+            try:
+                self.extra_mile.append((d['last_business_name'],d['balance']))
+            except KeyError:
+                print('ignoring entry, no business name found')
+                continue
 
     def fetchdata(self):
         try :
@@ -37,6 +46,10 @@ class BanksData:
 
             except KeyError:
                 print('No bank name found, adding to "__undefined__"')
+                if('balance' in entry.keys()):
+                    entry['balance'] = float(entry['balance'])
+                else :
+                    entry['balance'] = 0.
                 self.banks['__undefined__'].append(entry)
 
             except ValueError:
@@ -85,13 +98,45 @@ class BanksData:
 
         return highest_rel_key
 
-
-    def shuffle(self):
-        pass
-
-    def merge_sort(self):
-        pass
-
     def binary_search(self, balance):
-        pass
+        return binary_search(balance, self.extra_mile)
 
+def binary_search(v, l):
+    m = len(l) // 2
+    if m == 0:
+        return 0
+    if v > l[m][1]:
+        return binary_search(v, l[:m])
+    elif v == l[m][1]:
+        return m
+    else:
+        return m + binary_search(v, l[m:])
+
+def merge_sort(a):
+    size = len(a)
+    if(size == 1):
+        return a
+    m = size // 2
+    a[:m] = merge_sort(a[:m])
+    a[m:] = merge_sort(a[m:])
+    b = deepcopy(a)
+    k, i, j = 0, 0, m
+    while k < m and j < size :
+        if b[k][1] < b[j][1]:
+            a[i] = b[j]
+            j += 1
+        else :
+            a[i]=b[k]
+            k += 1
+        i+=1
+    while k<m :
+        a[i] = b[k]
+        i+=1
+        k+=1
+
+    while j<size:
+        a[i] = b[j]
+        i+=1
+        j+=1
+
+    return a
