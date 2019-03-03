@@ -1,5 +1,5 @@
 # Backend test
-Backend test scripts for a future interview.
+Backend test scripts for an interview (it was unsuccessful).
 
 `git clone https://github.com/idrissbellil/backendtest.git`
 
